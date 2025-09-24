@@ -1,0 +1,25 @@
+ Lista de Materiais
+
+ Equipamentos
+- Computadores da biblioteca (com Windows ou Linux)
+- Servidor remoto (VPS ou hospedagem em nuvem ou local)
+- Conexão com a internet (nos computadores e no servidor)
+
+ Software e Ferramentas
+- Compilador C (GCC ou MinGW, etc.)
+- Editor ou IDE (VS Code)
+- GitHub (para versionamento do código)
+- Ferramenta de conexão HTTP ou sockets (ex: libcurl, winsock, etc.)
+
+ Banco de Dados
+- Banco de dados remoto (MySQL ou PostgreSQL)
+- Ferramenta de administração do banco (DBeaver ou phpMyAdmin)
+- Servidor com suporte a SQL (Render)
+
+ Segurança
+- Certificado SSL no servidor (para HTTPS)
+- Sistema de autenticação/token (para envio seguro dos dados)
+
+ Documentação
+- Ferramenta de texto (Canva ou Word ou Google Docs)
+- Ferramenta de slides (Canva ou PowerPoint)
