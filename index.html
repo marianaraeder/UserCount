@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>UserCount — Tecnologia para Bibliotecas</title>
+<style>
+  /* ===== RESET & BASE ===== */
+  *{box-sizing:border-box;margin:0;padding:0;font-family:Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial;}
+  html,body{height:100%;background:linear-gradient(180deg,#071026 0,#081427 100%);color:#e6eef8;-webkit-font-smoothing:antialiased}
+  a{color:inherit;text-decoration:none}
+  img{max-width:100%;display:block}
+  .container{max-width:1100px;margin:0 auto;padding:28px}
+
+  /* ===== NAV ===== */
+  .nav{display:flex;align-items:center;justify-content:space-between;padding:18px 0;}
+  .brand{display:flex;align-items:center;gap:14px}
+  .logo{width:48px;height:48px;border-radius:10px;background:linear-gradient(135deg,#7c3aed,#4f46e5);display:flex;align-items:center;justify-content:center;font-weight:700;color:white;font-size:18px;box-shadow:0 8px 28px rgba(79,70,229,0.18)}
+  .nav-links{display:flex;gap:18px;align-items:center}
+  .nav-links a{color:#cfe4ff;padding:8px 12px;border-radius:8px;font-weight:600}
+  .nav-links a.cta{background:linear-gradient(90deg,#4f46e5,#7c3aed);color:white}
+  .hamburger{display:none;cursor:pointer;padding:8px;border-radius:8px}
+
+  /* ===== HERO ===== */
+  .hero{display:grid;grid-template-columns:1fr 460px;gap:36px;align-items:center;padding:36px 0;}
+  .hero h1{font-size:34px;line-height:1.05;color:white}
+  .hero p{color:#bcd6ff;margin-top:12px;font-size:16px}
+  .cta-row{margin-top:20px;display:flex;gap:12px}
+  .btn{background:linear-gradient(90deg,#4f46e5,#7c3aed);border:none;color:white;padding:12px 16px;border-radius:10px;font-weight:700;cursor:pointer}
+  .btn-ghost{background:transparent;border:1px solid rgba(255,255,255,0.08);color:#cfe4ff;padding:12px 16px;border-radius:10px;cursor:pointer}
+
+  /* ===== CARD / FEATURES ===== */
+  .features{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:28px}
+  .feature{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));padding:18px;border-radius:12px;border:1px solid rgba(255,255,255,0.03)}
+  .feature h4{margin-bottom:8px}
+
+  /* ===== WHO WE ARE ===== */
+  .about{display:grid;grid-template-columns:440px 1fr;gap:28px;align-items:center;margin-top:36px}
+  .card-large{background:linear-gradient(180deg,#071427,#06121c);padding:20px;border-radius:12px;border:1px solid rgba(255,255,255,0.03)}
+
+  /* ===== FOOTER ===== */
+  footer{margin-top:48px;padding:28px 0;border-top:1px solid rgba(255,255,255,0.03);color:#93b3d6;font-size:13px}
+
+  /* responsive */
+  @media (max-width:980px){
+    .hero{grid-template-columns:1fr; text-align:center}
+    .about{grid-template-columns:1fr}
+    .features{grid-template-columns:1fr 1fr}
+    .nav-links{display:none}
+    .hamburger{display:block}
+    .container{padding:18px}
+  }
+  @media (max-width:560px){
+    .features{grid-template-columns:1fr}
+    .hero h1{font-size:28px}
+  }
+</style>
+</head>
+<body>
+  <div class="container">
+    <!-- NAV -->
+    <header class="nav" role="navigation">
+      <div class="brand" aria-label="UserCount">
+        <div class="logo">UC</div>
+        <div>
+          <div style="font-weight:700">UserCount</div>
+          <div style="font-size:12px;color:#9fb7e1">Tecnologia para bibliotecas</div>
+        </div>
+      </div>
+
+      <nav>
+        <div class="nav-links" id="navLinks">
+          <a href="#home">Home</a>
+          <a href="#quem-somos">Quem somos</a>
+          <a href="pages/login.html" class="cta">Login</a>
+        </div>
+        <div class="hamburger" id="hamb" aria-hidden="true">☰</div>
+      </nav>
+    </header>
+
+    <!-- HERO -->
+    <section id="home" class="hero">
+      <div>
+        <h1>UserCount — tecnologia especializada em gestão de uso de computadores em bibliotecas</h1>
+        <p>Transformamos o controle de acesso e o monitoramento de estações em uma experiência simples, segura e analítica. Nossas soluções entregam relatórios prontos, histórico de uso, identificação de máquinas (SEN) e gestão de usuários com foco em bibliotecas e centros de estudo.</p>
+
+        <div class="cta-row">
+          <a class="btn" href="pages/login.html">Entrar no Painel</a>
+          <a class="btn-ghost" href="#quem-somos">Saiba mais</a>
+        </div>
+
+        <div style="margin-top:18px;color:#9fb7e1;font-size:13px">
+          <strong>Serviços:</strong> integração com sistemas locais • relatórios mensais • autenticação de bibliotecários
+        </div>
+      </div>
+
+      <div class="card-large">
+        <h3 style="margin-bottom:8px">Resultados que entregamos</h3>
+        <ul style="color:#bcd6ff;line-height:1.6;margin-top:10px">
+          <li>Redução do trabalho manual de contagem de acessos</li>
+          <li>Relatórios por dia, mês e máquina (SEN)</li>
+          <li>Logs dos programas utilizados por sessão</li>
+          <li>Cadastro e autenticação de bibliotecários</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- FEATURES -->
+    <section class="features" aria-label="Diferenciais">
+      <div class="feature">
+        <h4>Leve e fácil de integrar</h4>
+        <p style="color:#bcd6ff;font-size:14px">Aplicação web com backend simples (SQLite) ou integração via API para ambientes heterogêneos.</p>
+      </div>
+      <div class="feature">
+        <h4>Dashboards e relatórios</h4>
+        <p style="color:#bcd6ff;font-size:14px">KPI's diários/mensais, gráficos e exportação de dados para Excel/JSON.</p>
+      </div>
+      <div class="feature">
+        <h4>Controle e segurança</h4>
+        <p style="color:#bcd6ff;font-size:14px">Autenticação para bibliotecários e histórico auditável de sessões.</p>
+      </div>
+    </section>
+
+    <!-- WHO WE ARE -->
+    <section id="quem-somos" class="about">
+      <div class="card-large">
+        <h3>Quem somos</h3>
+        <p style="color:#bcd6ff;margin-top:10px">A UserCount é uma empresa especializada em soluções de tecnologia para bibliotecas e centros de estudo. Nosso objetivo é automatizar o registro do uso de computadores, fornecer dados confiáveis para gestão e permitir que as equipes se concentrem em atividades de maior valor.</p>
+        <p style="color:#9fb7e1;margin-top:10px;font-size:14px"><strong>Missão:</strong> tornar a gestão de recursos digitais simples e eficiente.</p>
+      </div>
+
+      <div>
+        <h3 style="color:#fff">Como trabalhamos</h3>
+        <ol style="color:#bcd6ff;margin-top:10px;line-height:1.7">
+          <li>Mapeamos as necessidades da biblioteca.</li>
+          <li>Implementamos um sistema com integração ao login das máquinas.</li>
+          <li>Fornecemos painel administrativo, relatórios e suporte.</li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- CONTACT / CTA -->
+    <section style="margin-top:36px;display:flex;gap:18px;flex-wrap:wrap;align-items:center">
+      <div style="flex:1;min-width:260px">
+        <h3>Quer testar?</h3>
+        <p style="color:#bcd6ff">Agende uma demonstração ou acesse o painel com sua conta de bibliotecário.</p>
+        <div style="margin-top:12px"><a class="btn" href="pages/login.html">Fazer login</a></div>
+      </div>
+      <div style="min-width:260px;color:#9fb7e1">
+        <h4>Contato</h4>
+        <div style="margin-top:8px">E-mail: <strong>contato@usercount.com</strong></div>
+        <div style="margin-top:6px">Telefone: <strong>(21) 99999-9999</strong></div>
+      </div>
+    </section>
+
+    <footer>
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap">
+        <div>© <strong>UserCount</strong> — Soluções para bibliotecas</div>
+        <div style="color:#93b3d6">Desenvolvido para SENAI — Projeto Integrador</div>
+      </div>
+    </footer>
+  </div>
+
+<script>
+  // mobile menu toggle
+  const hamb = document.getElementById('hamb');
+  const navLinks = document.getElementById('navLinks');
+  if(hamb){
+    hamb.addEventListener('click', ()=>{
+      if(navLinks.style.display === 'flex') navLinks.style.display = 'none';
+      else navLinks.style.display = 'flex';
+      navLinks.style.flexDirection = 'column';
+      navLinks.style.gap = '10px';
+      navLinks.style.background = 'rgba(7,18,38,0.6)';
+      navLinks.style.padding = '12px';
+      navLinks.style.position = 'absolute';
+      navLinks.style.right = '18px';
+      navLinks.style.top = '70px';
+      navLinks.style.borderRadius = '8px';
+    });
+  }
+
+  // smooth scroll for internal links
+  document.querySelectorAll('a[href^="#"]').forEach(a=>{
+    a.addEventListener('click', (e)=>{
+      e.preventDefault();
+      const id = a.getAttribute('href').slice(1);
+      const el = document.getElementById(id);
+      if(el) el.scrollIntoView({behavior:'smooth',block:'start'});
+    });
+  });
+</script>
+</body>
+</html>
