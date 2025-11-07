@@ -1,0 +1,849 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Painel Administrativo — Contabilizador</title>
+<style>
+  /* ======= RESET / BASE ======= */
+  *{box-sizing:border-box;font-family:Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;}
+  html,body{height:100%;margin:0;background:#0f1724;color:#e6eef8;-webkit-font-smoothing:antialiased;}
+  a{color:inherit;text-decoration:none}
+  button{cursor:pointer}
+
+  /* ======= LAYOUT ======= */
+  .app{display:flex;min-height:100vh}
+  .sidebar{
+    width:260px;background:linear-gradient(180deg,#0b1220 0,#0f1b2b 100%);padding:26px 18px;
+    border-right:1px solid rgba(255,255,255,0.03);
+    position:sticky;top:0;height:100vh;
+  }
+  .brand{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+  .logo{
+    width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,#7c3aed,#4f46e5);
+    display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:18px;box-shadow:0 6px 18px rgba(79,70,229,0.18)
+  }
+  .brand h1{font-size:16px;margin:0}
+  .nav{margin-top:18px;display:flex;flex-direction:column;gap:6px}
+  .nav a{padding:10px 12px;border-radius:8px;color:#bcd6ff;font-size:14px;display:flex;align-items:center;gap:10px}
+  .nav a.active{background:rgba(79,70,229,0.14);color:white}
+  .nav a:hover{background:rgba(255,255,255,0.03)}
+  .sidebar .muted{font-size:12px;color:#93b3d6;margin-top:18px}
+
+  .main{flex:1;padding:22px 28px;}
+  .topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;gap:12px}
+  .search{display:flex;gap:8px;align-items:center;background:rgba(255,255,255,0.02);padding:8px;border-radius:8px;width:400px}
+  .search input{background:transparent;border:0;color:inherit;outline:none;width:100%}
+  .userbox{display:flex;align-items:center;gap:10px}
+  .avatar{width:38px;height:38px;border-radius:10px;background:#1f2937;display:flex;align-items:center;justify-content:center;color:white;font-weight:600}
+
+  /* ======= DASHBOARD ======= */
+  .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:16px}
+  .card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));padding:16px;border-radius:12px;box-shadow:0 6px 18px rgba(2,6,23,0.6);border:1px solid rgba(255,255,255,0.02)}
+  .kpi{display:flex;gap:12px;align-items:center}
+  .kpi .num{font-size:22px;font-weight:700}
+  .kpi .label{font-size:12px;color:#93b3d6}
+  .card-wide{grid-column:span 8;}
+  .card-narrow{grid-column:span 4;}
+  .mini-grid{display:flex;gap:12px;flex-wrap:wrap}
+
+  /* ======= TABLE ======= */
+  .table-wrap{overflow:auto}
+  table{width:100%;border-collapse:collapse}
+  thead th{position:sticky;top:0;background:linear-gradient(180deg,#081122,#071427);padding:10px;text-align:left;font-size:12px;color:#9fb7e1}
+  tbody td{padding:10px;border-top:1px solid rgba(255,255,255,0.03);font-size:13px;color:#dfefff}
+  tr:hover td{background:rgba(255,255,255,0.01)}
+  .pill{padding:6px 8px;border-radius:999px;background:rgba(255,255,255,0.03);font-size:12px}
+
+  /* ======= FORM / FILTERS ======= */
+  .filters{display:flex;gap:10px;align-items:center;margin-bottom:12px;flex-wrap:wrap}
+  .input,select{background:transparent;border:1px solid rgba(255,255,255,0.04);padding:8px;border-radius:8px;color:inherit}
+  .btn{background:linear-gradient(90deg,#4f46e5,#7c3aed);border:none;color:white;padding:8px 12px;border-radius:8px;font-weight:600}
+
+  /* ======= MODAL ======= */
+  .modal-back{position:fixed;inset:0;background:rgba(2,6,23,0.6);display:none;align-items:center;justify-content:center;z-index:60}
+  .modal{background:#071026;padding:18px;border-radius:12px;min-width:320px;max-width:760px;border:1px solid rgba(255,255,255,0.03)}
+  .modal h3{margin:0 0 8px 0}
+  .row{display:flex;gap:12px;align-items:center}
+  .col{flex:1}
+
+  /* ======= PROFILE / REGISTER ======= */
+  .profile-card{display:flex;gap:16px;align-items:center}
+  .form-row{display:flex;gap:8px;flex-wrap:wrap}
+  .small{font-size:12px;color:#93b3d6}
+
+  /* ======= FOOTER ======= */
+  footer{margin-top:18px;color:#7d98c2;font-size:12px}
+
+  /* responsive */
+  @media(max-width:900px){
+    .sidebar{display:none}
+    .card-wide{grid-column:span 12}
+    .card-narrow{grid-column:span 12}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="logo">CT</div>
+      <div>
+        <h1>Contabilizador</h1>
+        <div class="small">Painel Administrativo</div>
+      </div>
+    </div>
+
+    <nav class="nav" id="menu">
+      <a href="#" data-view="dashboard" class="active">📊 Dashboard</a>
+      <a href="#" data-view="acessos">📋 Acessos</a>
+      <a href="#" data-view="usuarios">👥 Usuários</a>
+      <a href="#" data-view="perfil">🧑 Perfil</a>
+      <a href="#" data-view="sobre">ℹ️ Sobre / Export</a>
+    </nav>
+
+    <div class="muted">Usuário: <strong id="sidebarUser">Bibliotecário</strong></div>
+    <div style="margin-top:14px;font-size:12px;color:#80a7e6">Local: SENAI Petrópolis</div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+    <div class="topbar">
+      <div style="display:flex;gap:12px;align-items:center">
+        <div class="search">
+          🔎 <input id="quickSearch" placeholder="Pesquisar por credencial, nome, SEN..." />
+        </div>
+        <div class="small" id="dateInfo"></div>
+      </div>
+      <div class="userbox">
+        <button class="btn" id="newLibBtn">+ Cadastrar Bibliotecário</button>
+        <div class="avatar" id="avatarInitials">BI</div>
+      </div>
+    </div>
+
+    <!-- VIEWS -->
+    <section id="view-dashboard">
+      <div class="grid" style="align-items:start">
+        <div class="card card-narrow">
+          <div class="kpi">
+            <div>
+              <div class="num" id="kpi-daily">—</div>
+              <div class="label">Acessos diários</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card card-narrow">
+          <div class="kpi">
+            <div>
+              <div class="num" id="kpi-monthly">—</div>
+              <div class="label">Acessos mensais</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card card-narrow">
+          <div class="kpi">
+            <div>
+              <div class="num" id="kpi-active">—</div>
+              <div class="label">Usuários ativos</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card card-narrow">
+          <div class="kpi">
+            <div>
+              <div class="num" id="kpi-topprog">—</div>
+              <div class="label">Programa mais usado</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card card-wide" style="min-height:320px;display:flex;flex-direction:column">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+            <div style="font-weight:700">Acessos por dia</div>
+            <div class="small">Últimos 30 dias</div>
+          </div>
+          <div id="chart" style="flex:1;display:flex;align-items:center;justify-content:center"></div>
+        </div>
+
+        <div class="card card-wide">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+            <div style="font-weight:700">Programas mais usados</div>
+            <div class="small">Top 5</div>
+          </div>
+          <div id="progList" class="mini-grid"></div>
+        </div>
+
+      </div>
+    </section>
+
+    <section id="view-acessos" style="display:none">
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+          <div style="font-weight:700">Registros de Acesso</div>
+          <div class="small">Tabela com histórico</div>
+        </div>
+
+        <div class="filters">
+          <input type="date" id="filterDate" class="input" />
+          <input placeholder="Usuário (nome)..." id="filterUser" class="input" />
+          <input placeholder="SEN (ex: SEN590675)" id="filterSEN" class="input" />
+          <select id="filterSort" class="input">
+            <option value="desc">Ordenar: mais recentes</option>
+            <option value="asc">Ordenar: mais antigos</option>
+          </select>
+          <button class="btn" id="btnApply">Aplicar</button>
+          <button class="btn" id="btnReset" style="background:transparent;border:1px solid rgba(255,255,255,0.06)">Limpar</button>
+        </div>
+
+        <div class="table-wrap" style="margin-top:8px">
+          <table>
+            <thead>
+              <tr>
+                <th>Credencial</th>
+                <th>SEN (máquina)</th>
+                <th>Nome</th>
+                <th>Data</th>
+                <th>Início</th>
+                <th>Fim</th>
+                <th>Log</th>
+              </tr>
+            </thead>
+            <tbody id="accessTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section id="view-usuarios" style="display:none">
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+          <div style="font-weight:700">Usuários (mock)</div>
+          <div class="small">Gestão de bibliotecários</div>
+        </div>
+
+        <div style="display:flex;gap:12px;align-items:center;margin-bottom:12px">
+          <input id="newUserName" placeholder="Nome completo" class="input" />
+          <input id="newUserCred" placeholder="Credencial (PET + 7 dígitos)" class="input" />
+          <input id="newUserSen" placeholder="SEN (máquina preferencial)" class="input" />
+          <button class="btn" id="btnAddMock">Adicionar Usuário (mock)</button>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Credencial</th><th>Nome</th><th>Tipo</th><th>Ações</th></tr>
+            </thead>
+            <tbody id="usersTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section id="view-perfil" style="display:none">
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div class="profile-card">
+            <div class="avatar" id="profileAvatar">BI</div>
+            <div>
+              <div style="font-weight:700" id="profileName">Bibliotecário Teste</div>
+              <div class="small" id="profileCred">PET0000001 • bibliotecario</div>
+            </div>
+          </div>
+          <div>
+            <button class="btn" id="btnLogout">Sair</button>
+          </div>
+        </div>
+
+        <div style="margin-top:12px">
+          <div class="small" style="margin-bottom:8px">Informações</div>
+          <div style="display:flex;gap:12px;flex-wrap:wrap">
+            <div style="flex:1;min-width:220px">
+              <div class="small">Nome</div>
+              <div id="infoName" style="font-weight:600"></div>
+            </div>
+            <div style="flex:1;min-width:220px">
+              <div class="small">Credencial</div>
+              <div id="infoCred" style="font-weight:600"></div>
+            </div>
+            <div style="flex:1;min-width:220px">
+              <div class="small">Tipo</div>
+              <div id="infoTipo" style="font-weight:600"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="view-sobre" style="display:none">
+      <div class="card">
+        <h3>Sobre</h3>
+        <p class="small">Painel administrativo do projeto Contabilizador — mock de interface para testes e validação de UX. Os dados são mockados e podem ser exportados via Console/LocalStorage para integração posterior com API/DB.</p>
+        <div style="margin-top:12px;display:flex;gap:8px">
+          <button class="btn" id="btnExport">Exportar JSON</button>
+          <button class="btn" id="btnClearMock" style="background:transparent;border:1px solid rgba(255,255,255,0.06)">Limpar mock</button>
+        </div>
+        <footer>© SENAI — Projeto Integrador</footer>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- MODAL -->
+<div class="modal-back" id="modalBack">
+  <div class="modal" id="modal">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <h3 id="modalTitle">Usuário</h3>
+      <div style="display:flex;gap:8px">
+        <button class="btn" id="modalClose">Fechar</button>
+      </div>
+    </div>
+    <div id="modalContent"></div>
+  </div>
+</div>
+
+<script>
+/* ========== DADOS MOCK ==========
+   - Geramos acessos mockados para os últimos 30 dias
+   - Cada acesso tem: credencial, sen, nome, start, end, log (programas usados)
+*/
+(function(){
+  // Utilitários
+  const qs = s => document.querySelector(s);
+  const qsa = s => Array.from(document.querySelectorAll(s));
+  const fmtDate = d => d.toLocaleDateString('pt-BR');
+  const fmtTime = d => d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+
+  // Mock users (base)
+  let users = [
+    {cred:'PET0000123', name:'Ana Silva', tipo:'aluno', senPref:'SEN590675'},
+    {cred:'PET0000456', name:'Bruno Costa', tipo:'aluno', senPref:'SEN590701'},
+    {cred:'PET0000789', name:'Carla Souza', tipo:'aluno', senPref:'SEN590712'},
+    {cred:'PET0000999', name:'Diego Lima', tipo:'bibliotecario', senPref:'SEN590680'},
+    {cred:'PET0001000', name:'Eduarda Rocha', tipo:'aluno', senPref:'SEN590730'},
+  ];
+
+  // Guardar bibliotecários criados pelo painel em localStorage
+  const persistKey = 'contabilizador_users';
+  const libKey = 'contabilizador_librarians';
+  const mockAccessKey = 'contabilizador_mock_access';
+
+  // Carrega usuários persistidos
+  function loadPersisted(){
+    try{
+      const p = JSON.parse(localStorage.getItem(persistKey)||'null');
+      if(p && Array.isArray(p)) users = p;
+    }catch(e){}
+    try{
+      const libs = JSON.parse(localStorage.getItem(libKey)||'null');
+      if(libs && Array.isArray(libs)) {
+        // add bibliotecarios (avoid duplicates)
+        libs.forEach(l => {
+          if(!users.some(u=>u.cred===l.cred)) users.push(l);
+        });
+      }
+    }catch(e){}
+  }
+  loadPersisted();
+
+  // Mock programas
+  const programas = ["Chrome.exe","Word.exe","Excel.exe","VSCode.exe","Spotify.exe","Edge.exe","PowerPoint.exe","Calc.exe"];
+
+  // Generate mock accesses or load from storage
+  let accesses = [];
+  function generateMockAccesses(days=30){
+    // Try load
+    const raw = localStorage.getItem(mockAccessKey);
+    if(raw){
+      try{
+        accesses = JSON.parse(raw);
+        return;
+      }catch(e){}
+    }
+    accesses = [];
+    const today = new Date();
+    for(let d=0; d<days; d++){
+      const day = new Date(today.getFullYear(), today.getMonth(), today.getDate()-d);
+      const count = 6 + Math.floor(Math.random()*8);
+      for(let i=0;i<count;i++){
+        const usr = users[Math.floor(Math.random()*users.length)];
+        const cred = usr.cred;
+        const senNum = 590000 + Math.floor(Math.random()*1000);
+        const sen = 'SEN' + senNum;
+        const startH = 8 + Math.floor(Math.random()*10);
+        const startM = Math.floor(Math.random()*60);
+        const dur = 20 + Math.floor(Math.random()*200); // minutes
+        const start = new Date(day.getFullYear(),day.getMonth(),day.getDate(),startH,startM);
+        const end = new Date(start.getTime()+dur*60000);
+        // program log: random sequence
+        const logCount = 1 + Math.floor(Math.random()*6);
+        const log = [];
+        for(let p=0;p<logCount;p++){
+          const pr = programas[Math.floor(Math.random()*programas.length)];
+          log.push({program:pr, tempoMin: 1 + Math.floor(Math.random()*30)});
+        }
+        accesses.push({
+          id: 'A' + Math.random().toString(36).slice(2,9),
+          cred,
+          sen,
+          name: usr.name,
+          start: start.toISOString(),
+          end: end.toISOString(),
+          log
+        });
+      }
+    }
+    // persist
+    localStorage.setItem(mockAccessKey, JSON.stringify(accesses));
+  }
+  generateMockAccesses(30);
+
+  // Simulated current logged-in bibliotecario
+  let currentUser = users.find(u=>u.tipo==='bibliotecario') || {cred:'PET0000001',name:'Bibliotecário Teste',tipo:'bibliotecario'};
+  // persist current user as last active
+  const lastUser = localStorage.getItem('contabilizador_current');
+  if(lastUser){ try{ currentUser = JSON.parse(lastUser); }catch(e){} }
+
+  // ====== UI functions ======
+  const menuLinks = qsa('#menu a');
+  menuLinks.forEach(a=>{
+    a.addEventListener('click', e=>{
+      e.preventDefault();
+      menuLinks.forEach(x=>x.classList.remove('active'));
+      a.classList.add('active');
+      showView(a.dataset.view);
+    });
+  });
+
+  function showView(name){
+    qsa('[id^="view-"]').forEach(s=>s.style.display='none');
+    qs('#view-' + name).style.display='block';
+    // update date info
+    qs('#dateInfo').textContent = new Date().toLocaleString('pt-BR',{dateStyle:'medium',timeStyle:'short'});
+    // specific actions
+    if(name === 'dashboard') renderDashboard();
+    if(name === 'acessos') renderAccessTable();
+    if(name === 'usuarios') renderUsers();
+    if(name === 'perfil') renderProfile();
+  }
+
+  // Quick search
+  qs('#quickSearch').addEventListener('input', e=>{
+    const q = e.target.value.trim();
+    if(window.location.hash !== '#acessos') {
+      // go to acessos view if typing
+      menuLinks.forEach(x=>x.classList.remove('active'));
+      const link = menuLinks.find(l=>l.dataset.view==='acessos');
+      if(link) link.classList.add('active');
+      showView('acessos');
+    }
+    applyFilters();
+  });
+
+  // Filters
+  qs('#btnApply').addEventListener('click', applyFilters);
+  qs('#btnReset').addEventListener('click', ()=>{
+    qs('#filterDate').value='';
+    qs('#filterUser').value='';
+    qs('#filterSEN').value='';
+    qs('#filterSort').value='desc';
+    qs('#quickSearch').value='';
+    renderAccessTable();
+  });
+
+  function applyFilters(){
+    renderAccessTable();
+  }
+
+  // Render KPI & chart
+  function renderDashboard(){
+    // daily = today
+    const today = new Date(); const todayStr = today.toISOString().slice(0,10);
+    const daily = accesses.filter(a => a.start.slice(0,10) === todayStr).length;
+    qs('#kpi-daily').textContent = daily;
+
+    // monthly: same month-year
+    const month = today.toISOString().slice(0,7);
+    const monthly = accesses.filter(a => a.start.slice(0,7) === month).length;
+    qs('#kpi-monthly').textContent = monthly;
+
+    // active users: distinct cred in last 30 days
+    const activeSet = new Set(accesses.map(a=>a.cred));
+    qs('#kpi-active').textContent = activeSet.size;
+
+    // top program
+    const progCount = {};
+    accesses.forEach(a=>{
+      (a.log||[]).forEach(l=>{
+        progCount[l.program] = (progCount[l.program]||0)+1;
+      });
+    });
+    const progSorted = Object.entries(progCount).sort((a,b)=>b[1]-a[1]);
+    qs('#kpi-topprog').textContent = progSorted.length ? progSorted[0][0] : '—';
+
+    // program list top 5
+    const listEl = qs('#progList'); listEl.innerHTML='';
+    progSorted.slice(0,5).forEach(([prog,count])=>{
+      const card = document.createElement('div');
+      card.className='card';
+      card.style.minWidth='160px';
+      card.innerHTML = `<div style="font-weight:700">${prog}</div><div class="small">${count} usos</div>`;
+      listEl.appendChild(card);
+    });
+
+    // chart: accesses per day last 30 days
+    const counts = {};
+    accesses.forEach(a=>{
+      const day = a.start.slice(0,10);
+      counts[day] = (counts[day]||0)+1;
+    });
+    // build ordered array of last 30 days
+    const data = [];
+    for(let i=29;i>=0;i--){
+      const d = new Date(); d.setDate(d.getDate()-i);
+      const key = d.toISOString().slice(0,10);
+      data.push({day:key, count:counts[key]||0, label: d.getDate()+'/'+(d.getMonth()+1)});
+    }
+    renderSVGChart(data);
+  }
+
+  // SVG line/bar chart
+  function renderSVGChart(data){
+    const w = 800, h = 220, pad = 24;
+    const max = Math.max(5, ...data.map(d=>d.count));
+    const stepX = (w-2*pad) / (data.length-1);
+    let path = '';
+    data.forEach((d,i)=>{
+      const x = pad + i*stepX;
+      const y = h - pad - ( (d.count/max) * (h-2*pad) );
+      path += (i===0?`M ${x} ${y}`:` L ${x} ${y}`);
+    });
+    // bars for hover
+    let bars = '';
+    data.forEach((d,i)=>{
+      const x = pad + i*stepX;
+      const barW = Math.max(6, stepX*0.7);
+      const barH = (d.count/max) * (h-2*pad);
+      const bx = x - barW/2;
+      const by = h - pad - barH;
+      bars += `<rect data-i="${i}" x="${bx}" y="${by}" width="${barW}" height="${barH}" fill="rgba(79,70,229,0.9)"></rect>`;
+    });
+
+    let svg = `<svg viewBox="0 0 ${w} ${h}" width="100%" height="220" preserveAspectRatio="none">
+      <defs>
+        <linearGradient id="g1" x1="0" x2="0" y1="0" y2="1">
+          <stop offset="0" stop-color="#7c3aed" stop-opacity="0.28"/>
+          <stop offset="1" stop-color="#0b1220" stop-opacity="0"/>
+        </linearGradient>
+      </defs>
+      <rect x="0" y="0" width="${w}" height="${h}" fill="transparent"/>
+      <g stroke="rgba(255,255,255,0.06)" stroke-width="0.6">
+        ${Array.from({length:5}).map((_,i)=>{
+          const yy = pad + i*( (h-2*pad)/4 );
+          return `<line x1="${pad}" x2="${w-pad}" y1="${yy}" y2="${yy}" />`;
+        }).join('')}
+      </g>
+      <path d="${path}" fill="none" stroke="#7c3aed" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round" />
+      <path d="${path} L ${w-pad} ${h-pad} L ${pad} ${h-pad} Z" fill="url(#g1)" opacity="0.6" />
+      ${bars}
+      <g font-size="10" fill="#9fb7e1">` +
+      data.map((d,i)=>{
+        const x = pad + i*stepX;
+        return `<text x="${x}" y="${h-4}" text-anchor="middle">${d.label}</text>`;
+      }).join('') + `</g>
+    </svg>`;
+
+    qs('#chart').innerHTML = svg;
+
+    // attach simple hover tooltip for bars
+    qs('#chart').querySelectorAll('rect').forEach(rect=>{
+      rect.style.cursor='pointer';
+      rect.addEventListener('mouseenter', e=>{
+        const i = +rect.getAttribute('data-i');
+        const d = data[i];
+        const tip = document.createElement('div');
+        tip.id='chartTip';
+        tip.style.position='absolute';
+        tip.style.background='#071026';
+        tip.style.border='1px solid rgba(255,255,255,0.04)';
+        tip.style.padding='6px 8px';
+        tip.style.borderRadius='6px';
+        tip.style.fontSize='12px';
+        tip.style.color='#dfefff';
+        tip.innerHTML = `<strong>${d.count}</strong> acessos<br/><span class="small">${fmtDate(new Date(d.day))}</span>`;
+        document.body.appendChild(tip);
+        rect._tip = tip;
+        rect.addEventListener('mousemove', moveTip);
+      });
+      rect.addEventListener('mouseleave', e=>{
+        const tip = rect._tip;
+        if(tip) { tip.remove(); rect._tip = null; rect.removeEventListener('mousemove', moveTip)}
+      });
+      rect.addEventListener('click', e=>{
+        const i = +rect.getAttribute('data-i');
+        const day = data[i].day;
+        // open acessos view and filter by that day
+        menuLinks.forEach(x=>x.classList.remove('active'));
+        const link = menuLinks.find(l=>l.dataset.view==='acessos');
+        if(link) link.classList.add('active');
+        showView('acessos');
+        qs('#filterDate').value = day;
+        renderAccessTable();
+      });
+    });
+
+    function moveTip(ev){
+      const tip = ev.currentTarget._tip;
+      if(!tip) return;
+      tip.style.left = (ev.clientX + 12) + 'px';
+      tip.style.top = (ev.clientY - 28) + 'px';
+    }
+  }
+
+  // Render access table
+  function renderAccessTable(){
+    const tbody = qs('#accessTableBody');
+    tbody.innerHTML = '';
+    // gather filters
+    const q = qs('#quickSearch').value.trim().toLowerCase();
+    const fdate = qs('#filterDate').value;
+    const fuser = qs('#filterUser').value.trim().toLowerCase();
+    const fsen = qs('#filterSEN').value.trim().toLowerCase();
+    const sort = qs('#filterSort').value;
+
+    let rows = accesses.slice(); // copy
+    // text search
+    if(q) {
+      rows = rows.filter(r => (r.cred||'').toLowerCase().includes(q) || (r.name||'').toLowerCase().includes(q) || (r.sen||'').toLowerCase().includes(q));
+    }
+    if(fdate) rows = rows.filter(r => r.start.slice(0,10) === fdate);
+    if(fuser) rows = rows.filter(r => (r.name||'').toLowerCase().includes(fuser));
+    if(fsen) rows = rows.filter(r => (r.sen||'').toLowerCase().includes(fsen));
+    rows.sort((a,b) => sort==='desc' ? (b.start.localeCompare(a.start)) : (a.start.localeCompare(b.start)));
+    // render
+    rows.forEach(r=>{
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${r.cred}</td>
+        <td>${r.sen}</td>
+        <td><a href="#" class="user-link" data-cred="${r.cred}">${r.name}</a></td>
+        <td>${fmtDate(new Date(r.start))}</td>
+        <td>${fmtTime(new Date(r.start))}</td>
+        <td>${fmtTime(new Date(r.end))}</td>
+        <td><button class="pill btn-log" data-id="${r.id}">Log</button></td>
+      `;
+      tbody.appendChild(tr);
+    });
+
+    // attach events for user link and log buttons
+    qsa('.user-link').forEach(a=>{
+      a.addEventListener('click', e=>{
+        e.preventDefault();
+        const cred = a.dataset.cred;
+        openUserModal(cred);
+      });
+    });
+    qsa('.btn-log').forEach(b=>{
+      b.addEventListener('click', e=>{
+        const id = b.dataset.id;
+        openLogModal(id);
+      });
+    });
+  }
+
+  // Open modal showing user details
+  function openUserModal(cred){
+    const u = users.find(x=>x.cred===cred) || {cred,name:'—',tipo:'—'};
+    const content = document.createElement('div');
+    const userAccesses = accesses.filter(a=>a.cred===cred).sort((a,b)=>b.start.localeCompare(a.start)).slice(0,10);
+    content.innerHTML = `
+      <div style="display:flex;gap:12px;align-items:center;margin-bottom:8px">
+        <div class="avatar" style="width:56px;height:56px;border-radius:10px">${(u.name||'--').split(' ').map(s=>s[0]).join('').slice(0,2).toUpperCase()}</div>
+        <div>
+          <div style="font-weight:700">${u.name||'—'}</div>
+          <div class="small">${u.cred} • ${u.tipo||'—'}</div>
+        </div>
+      </div>
+      <div style="margin-top:8px">
+        <div class="small" style="margin-bottom:6px">Últimos acessos</div>
+        <div style="max-height:200px;overflow:auto">
+          <table style="width:100%;border-collapse:collapse">
+            <thead><tr><th class="small">Data</th><th class="small">Início</th><th class="small">Fim</th><th class="small">SEN</th></tr></thead>
+            <tbody>
+              ${userAccesses.map(a=>`<tr><td>${fmtDate(new Date(a.start))}</td><td>${fmtTime(new Date(a.start))}</td><td>${fmtTime(new Date(a.end))}</td><td>${a.sen}</td></tr>`).join('') || '<tr><td colspan="4">Nenhum</td></tr>'}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    `;
+    showModal('Dados do usuário', content);
+  }
+
+  // Open log modal for a specific access id
+  function openLogModal(id){
+    const a = accesses.find(x=>x.id===id);
+    if(!a) return;
+    const content = document.createElement('div');
+    content.innerHTML = `
+      <div class="small" style="margin-bottom:8px">Programas usados durante a sessão</div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        ${(a.log||[]).map(l=>`<div style="display:flex;justify-content:space-between;gap:8px;padding:8px;background:rgba(255,255,255,0.02);border-radius:8px"><div>${l.program}</div><div class="small">${l.tempoMin} min</div></div>`).join('') || '<div>Nenhum log</div>'}
+      </div>
+      <div style="margin-top:12px" class="small">Sessão: ${fmtDate(new Date(a.start))} • ${fmtTime(new Date(a.start))} - ${fmtTime(new Date(a.end))}</div>
+    `;
+    showModal('Log de programas', content);
+  }
+
+  // Show generic modal (content can be DOM node or HTML)
+  function showModal(title, content){
+    qs('#modalTitle').textContent = title;
+    const container = qs('#modalContent');
+    container.innerHTML = '';
+    if(content instanceof Node) container.appendChild(content);
+    else container.innerHTML = content;
+    qs('#modalBack').style.display = 'flex';
+  }
+  qs('#modalClose').addEventListener('click', ()=>qs('#modalBack').style.display='none');
+  qs('#modalBack').addEventListener('click', e=>{ if(e.target===qs('#modalBack')) qs('#modalBack').style.display='none' });
+
+  // Render users table
+  function renderUsers(){
+    const tbody = qs('#usersTableBody');
+    tbody.innerHTML = '';
+    users.forEach(u=>{
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>${u.cred}</td><td>${u.name}</td><td>${u.tipo||'aluno'}</td><td><button class="btn" data-cred="${u.cred}">Ver</button></td>`;
+      tbody.appendChild(tr);
+    });
+    qsa('#usersTableBody button').forEach(b=>{
+      b.addEventListener('click', e=>{
+        const cred = b.dataset.cred;
+        openUserModal(cred);
+      });
+    });
+  }
+
+  // Add mock user (from usuarios view)
+  qs('#btnAddMock').addEventListener('click', ()=>{
+    const name = qs('#newUserName').value.trim();
+    const cred = qs('#newUserCred').value.trim();
+    const sen = qs('#newUserSen').value.trim();
+    if(!name || !cred){ alert('Nome e credencial são obrigatórios'); return; }
+    if(!/^PET\d{7}$/.test(cred)){ alert('Credencial deve seguir PET + 7 dígitos (ex: PET0000123)'); return; }
+    const newU = {cred,name,tipo:'aluno',senPref: sen || ''};
+    users.push(newU);
+    // persist
+    localStorage.setItem(persistKey, JSON.stringify(users));
+    qs('#newUserName').value='';qs('#newUserCred').value='';qs('#newUserSen').value='';
+    renderUsers();
+    alert('Usuário mock adicionado');
+  });
+
+  // New librarian modal / register
+  qs('#newLibBtn').addEventListener('click', ()=>{
+    const form = document.createElement('div');
+    form.innerHTML = `
+      <div class="form-row" style="margin-bottom:8px">
+        <input id="libName" class="input" placeholder="Nome completo" />
+        <input id="libCred" class="input" placeholder="Credencial (PET + 7 dígitos)" />
+      </div>
+      <div style="display:flex;gap:8px;justify-content:flex-end">
+        <button class="btn" id="libSave">Salvar</button>
+      </div>
+    `;
+    showModal('Cadastrar bibliotecário', form);
+    qs('#libSave').addEventListener('click', ()=>{
+      const name = qs('#libName').value.trim();
+      const cred = qs('#libCred').value.trim();
+      if(!name || !cred){ alert('Preencha ambos'); return; }
+      if(!/^PET\d{7}$/.test(cred)){ alert('Credencial inválida (PET + 7 dígitos)'); return; }
+      const newLib = {cred,name,tipo:'bibliotecario',senPref:''};
+      // add to both users and librarians store
+      users.push(newLib);
+      const libs = JSON.parse(localStorage.getItem(libKey)||'[]');
+      libs.push(newLib);
+      localStorage.setItem(libKey, JSON.stringify(libs));
+      localStorage.setItem(persistKey, JSON.stringify(users));
+      qs('#modalBack').style.display='none';
+      renderUsers();
+      alert('Bibliotecário cadastrado com sucesso');
+    });
+  });
+
+  // Profile render
+  function renderProfile(){
+    qs('#profileAvatar').textContent = currentUser.name.split(' ').map(s=>s[0]).join('').slice(0,2).toUpperCase();
+    qs('#profileName').textContent = currentUser.name;
+    qs('#profileCred').textContent = currentUser.cred + ' • ' + currentUser.tipo;
+    qs('#infoName').textContent = currentUser.name;
+    qs('#infoCred').textContent = currentUser.cred;
+    qs('#infoTipo').textContent = currentUser.tipo;
+    qs('#sidebarUser').textContent = currentUser.name;
+    qs('#avatarInitials').textContent = currentUser.name.split(' ').map(s=>s[0]).join('').slice(0,2).toUpperCase();
+    localStorage.setItem('contabilizador_current', JSON.stringify(currentUser));
+  }
+
+  // Export JSON
+  qs('#btnExport').addEventListener('click', ()=>{
+    const out = {users,accesses};
+    const txt = JSON.stringify(out,null,2);
+    // create download
+    const blob = new Blob([txt],{type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'contabilizador_export.json'; a.click();
+    URL.revokeObjectURL(url);
+  });
+
+  // clear mock
+  qs('#btnClearMock').addEventListener('click', ()=>{
+    if(confirm('Limpar dados mock (acessos gerados) e recarregar)?')){
+      localStorage.removeItem(mockAccessKey);
+      generateMockAccesses(30);
+      renderAccessTable();
+      renderDashboard();
+      alert('Mock reinicializado');
+    }
+  });
+
+  // logout (simples)
+  qs('#btnLogout').addEventListener('click', ()=>{
+    if(confirm('Encerrar sessão?')){
+      currentUser = {cred:'PET0000000',name:'Visitante',tipo:'visitante'};
+      renderProfile();
+      alert('Sessão encerrada (mock)');
+    }
+  });
+
+  // modal close already wired
+  // initial render
+  renderDashboard();
+  renderAccessTable();
+  renderUsers();
+  renderProfile();
+
+  // Expose some for console debugging/testing
+  window.__CONTABILIZADOR = {users,accesses,programas,refresh:()=>{
+    // re-read local storage and rerender
+    loadPersisted();
+    generateMockAccesses(30);
+    renderDashboard(); renderAccessTable(); renderUsers(); renderProfile();
+    console.log('refresh done');
+  }};
+
+  // Click on table name when created by quickSearch initial
+  qs('#quickSearch').addEventListener('keydown', e=>{
+    if(e.key === 'Enter') applyFilters();
+  });
+
+  // date info
+  qs('#dateInfo').textContent = new Date().toLocaleString('pt-BR',{dateStyle:'medium',timeStyle:'short'});
+
+})();
+</script>
+</body>
+</html>

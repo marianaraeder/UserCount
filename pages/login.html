@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login | UserCount</title>
+  <style>
+    * { box-sizing: border-box; font-family: 'Inter', sans-serif; }
+    html, body { margin: 0; padding: 0; height: 100%; background: linear-gradient(135deg, #4f46e5, #7c3aed); display: flex; align-items: center; justify-content: center; }
+    .login-container { background: #fff; padding: 60px 50px; border-radius: 20px; box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15); width: 100%; max-width: 440px; text-align: center; }
+    h1 { color: #4f46e5; margin-bottom: 10px; cursor: pointer; }
+    h1:hover { text-decoration: underline; }
+    p { color: #555; font-size: 15px; margin-bottom: 35px; }
+    .input-group { text-align: left; margin-bottom: 25px; }
+    label { display: block; color: #333; font-weight: 600; margin-bottom: 6px; }
+    input { width: 100%; padding: 14px; border: 1px solid #ccc; border-radius: 8px; outline: none; transition: 0.3s; font-size: 15px; }
+    input:focus { border-color: #4f46e5; box-shadow: 0 0 6px rgba(79, 70, 229, 0.3); }
+    button { background: linear-gradient(90deg, #4f46e5, #7c3aed); border: none; color: white; padding: 14px; border-radius: 10px; font-weight: 600; cursor: pointer; width: 100%; font-size: 15px; transition: 0.3s; margin-top: 10px; }
+    button:hover { opacity: 0.9; transform: scale(1.02); }
+    .error { color: red; font-size: 13px; margin-top: 10px; display: none; }
+    .footer { margin-top: 40px; font-size: 12px; color: #777; }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <h1 id="title">UserCount</h1>
+    <p>Acesse o painel administrativo</p>
+    <div class="input-group">
+      <label for="email">E-mail</label>
+      <input type="email" id="email" placeholder="exemplo@firjan.com.br">
+    </div>
+    <div class="input-group">
+      <label for="password">Senha</label>
+      <input type="password" id="password" placeholder="Digite sua senha">
+    </div>
+    <button id="loginBtn">Entrar</button>
+    <div class="error" id="errorMsg">E-mail ou senha incorretos</div>
+    <div class="footer">© SENAI - Projeto Integrador</div>
+  </div>
+
+  <script>
+    // Redireciona ao clicar em UserCount
+    document.getElementById('title').addEventListener('click', () => {
+      window.location.href = 'index.html';
+    });
+
+    const loginBtn = document.getElementById('loginBtn');
+    const errorMsg = document.getElementById('errorMsg');
+
+    loginBtn.addEventListener('click', () => {
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value.trim();
+
+      // Usuário padrão
+      const defaultUser = { email: 'jcler@firjan.com.br', password: '12345', name: 'Administrador' };
+
+      // Lista de bibliotecários salvos
+      const biblios = JSON.parse(localStorage.getItem('bibliotecarios') || '[]');
+      const matchBibliotecario = biblios.find(u => u.email === email && u.password === password);
+
+      if ((email === defaultUser.email && password === defaultUser.password) || matchBibliotecario) {
+        const user = matchBibliotecario || defaultUser;
+        localStorage.setItem('currentUser', JSON.stringify(user));
+        window.location.href = 'painel.html';
+      } else {
+        errorMsg.style.display = 'block';
+      }
+    });
+  </script>
+</body>
+</html>
